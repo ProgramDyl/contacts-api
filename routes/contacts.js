@@ -1,5 +1,26 @@
 import express from 'express';
+import multer from 'multer';
+
 const router = express.Router();
+
+// Multer setup
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+    cb(null, 'public/images/'); // save uploaded files in `public/images` folder
+    },
+    filename: function (req, file, cb) {
+    const ext = file.originalname.split('.').pop(); // get file extension
+    const uniqueFilename = Date.now() + '-' + Math.round(Math.random() * 1000) + '.' + ext; // generate unique filename - current timestamp + random number between 0 and 1000.
+    cb(null, uniqueFilename);
+    }
+    });
+    const upload = multer({ storage: storage });
+
+    
+//
+//Routes
+//    
+
 
 router.get('/', (req, res) => {
     res.send('lets goooooooooo');
@@ -18,14 +39,20 @@ router.get('/:id', (req, res) => {
 
 //To-Do: add post, put, and delete routers
 
-// Create new contact (POST)
-router.post('/create', (req, res) => {
-    const newContact = req.body;
-    res.send('Contact created: ' + JSON.stringify(newContact)); //stringify function sourced from Co-Pilot :)
+// Create new contact (POST) (with Multer)
+router.post('/create', upload.single('image'),(req, res) => {
+    // const newContact = req.body;
+    const filename = req.file ? req.file.filename : '';
+    const { first_name, last_name, email, phone} = req.body; 
+
+    console.log(`Uploaded file: ` + filename);
+    console.log(`My contact's name: ${first_name} ${last_name}`);
+
+    res.send('Add a new contact '); 
 });
 
-// Update an existing contact
-router.put('/update/:id', (req, res) => {
+// Update an existing contact (with Multer)
+router.put('/update/:id', upload.single('image'),(req, res) => {
     const id = req.params.id;
     const updatedContact = req.body;
     res.send('Contact updated: ' + JSON.stringify(updatedContact));
